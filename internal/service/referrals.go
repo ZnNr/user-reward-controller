@@ -2,8 +2,9 @@ package service
 
 import (
 	"errors"
-	"github.com/ZnNr/user-reward-controler/internal/models"
-	"github.com/ZnNr/user-reward-controler/internal/repository"
+	"github.com/ZnNr/user-reward-controller/internal/models"
+	"github.com/ZnNr/user-reward-controller/internal/repository"
+
 	"github.com/google/uuid"
 	"time"
 

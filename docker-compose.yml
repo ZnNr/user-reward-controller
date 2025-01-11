@@ -12,6 +12,13 @@ services:
       - "5432:5432"                    # Проброс порта для доступа к БД
     volumes:
       - pg_data:/var/lib/postgresql/data # Хранение данных
-
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
 volumes:
   pg_data:
+
+

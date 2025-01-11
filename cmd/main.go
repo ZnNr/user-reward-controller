@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/ZnNr/user-reward-controler/config"
-	"github.com/ZnNr/user-reward-controler/internal/server"
+	"github.com/ZnNr/user-reward-controller/config"
+	"github.com/ZnNr/user-reward-controller/internal/server"
+
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"

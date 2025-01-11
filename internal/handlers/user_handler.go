@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/ZnNr/user-reward-controler/internal/errors"
-	"github.com/ZnNr/user-reward-controler/internal/models"
-	"github.com/ZnNr/user-reward-controler/internal/service"
+	"github.com/ZnNr/user-reward-controller/internal/errors"
+	"github.com/ZnNr/user-reward-controller/internal/models"
+	"github.com/ZnNr/user-reward-controller/internal/service"
+
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"net/http"

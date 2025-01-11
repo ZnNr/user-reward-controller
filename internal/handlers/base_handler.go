@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/ZnNr/user-reward-controler/internal/errors"
+	"github.com/ZnNr/user-reward-controller/internal/errors"
 	"go.uber.org/zap"
 	"net/http"
 )

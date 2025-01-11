@@ -12,10 +12,12 @@ const (
 	Internal      ErrorType = "INTERNAL"
 	Validation    ErrorType = "VALIDATION"
 	AlreadyExists ErrorType = "ALREADY_EXISTS"
+	InvalidToken  ErrorType = "INVALID_TOKEN" // Новая ошибка для недействительного токена
 
 	ErrMsgInvalidInput = "invalid input parameters"
 	ErrMsgInternal     = "internal server error"
 	ErrMsgNotFound     = "resource not found"
+	ErrMsgInvalidToken = "invalid token" // Сообщение для недействительного токена
 )
 
 // StatusCode - мапа с кодами статуса для каждого типа ошибки.
@@ -25,6 +27,7 @@ var StatusCode = map[ErrorType]int{
 	Internal:      500,
 	Validation:    422,
 	AlreadyExists: 409,
+	InvalidToken:  401, // Код состояния для недействительного токена
 }
 
 // Error - структура, представляющая ошибку с дополнительной информацией.
@@ -61,34 +64,32 @@ func NewError(errorType ErrorType, message string, err error) *Error {
 
 // Удобные функции для создания ошибок конкретных типов.
 
-// NewNotFound создает ошибку типа NotFound.
 func NewNotFound(message string, err error) *Error {
 	return NewError(NotFound, message, err)
 }
 
-// NewBadRequest создает ошибку типа BadRequest.
 func NewBadRequest(message string, err error) *Error {
 	return NewError(BadRequest, message, err)
 }
 
-// NewInternal создает ошибку типа Internal.
 func NewInternal(message string, err error) *Error {
 	return NewError(Internal, message, err)
 }
 
-// NewValidation создает ошибку типа Validation.
 func NewValidation(message string, err error) *Error {
 	return NewError(Validation, message, err)
 }
 
-// NewAlreadyExists создает ошибку типа AlreadyExists.
 func NewAlreadyExists(message string, err error) *Error {
 	return NewError(AlreadyExists, message, err)
 }
 
-// NewInvalidArgument создает ошибку типа BadRequest.
 func NewInvalidArgument(message string, err error) *Error {
 	return NewError(BadRequest, message, err)
+}
+
+func NewInvalidToken(message string, err error) *Error {
+	return NewError(InvalidToken, message, err) // Новая функция для недействительного токена
 }
 
 // Проверки типов ошибок.
@@ -106,6 +107,10 @@ func IsNotFound(err error) bool {
 
 func IsBadRequest(err error) bool {
 	return IsErrorType(err, BadRequest)
+}
+
+func IsInvalidToken(err error) bool { // Функция для проверки недействительного токена
+	return IsErrorType(err, InvalidToken)
 }
 
 // Unwrap для поддержки errors.Is и errors.As

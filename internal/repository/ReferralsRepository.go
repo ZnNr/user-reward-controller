@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/ZnNr/user-reward-controler/internal/models"
+import "github.com/ZnNr/user-reward-controller/internal/models"
 
 type ReferralRepository interface {
 	CreateReferral(userID string, code string) (*models.Referral, error)

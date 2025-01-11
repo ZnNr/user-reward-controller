@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/ZnNr/user-reward-controler/internal/errors"
-	"github.com/ZnNr/user-reward-controler/internal/models"
-	"github.com/ZnNr/user-reward-controler/internal/service"
+	"github.com/ZnNr/user-reward-controller/internal/errors"
+	"github.com/ZnNr/user-reward-controller/internal/models"
+	"github.com/ZnNr/user-reward-controller/internal/service"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -179,23 +180,25 @@ func (h *TaskHandler) UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 	h.logger.Debug("Handling UpdateTaskStatus request")
 
 	vars := mux.Vars(r)
-	idStr := vars["task_id"]
+	idStr := vars["task_id"]     // Получаем id задачи
+	userIdStr := vars["user_id"] // Получаем id пользователя
+
 	taskId, err := uuid.Parse(idStr)
 	if err != nil {
 		h.handleError(w, errors.NewBadRequest("Invalid task ID", err))
 		return
 	}
 
-	newStatusStr := r.URL.Query().Get("status")
-	newStatus, err := strconv.Atoi(newStatusStr) // Assuming status is an integer
+	userID, err := uuid.Parse(userIdStr) // Конвертируем строку userId в uuid
 	if err != nil {
-		h.handleError(w, errors.NewBadRequest("Invalid status value", err))
+		h.handleError(w, errors.NewBadRequest("Invalid user ID", err))
 		return
 	}
 
-	userID, err := uuid.Parse(r.Header.Get("X-User-ID")) // Fetching user ID from headers
+	newStatusStr := r.URL.Query().Get("status")
+	newStatus, err := strconv.Atoi(newStatusStr)
 	if err != nil {
-		h.handleError(w, errors.NewBadRequest("Invalid user ID", err))
+		h.handleError(w, errors.NewBadRequest("Invalid status value", err))
 		return
 	}
 

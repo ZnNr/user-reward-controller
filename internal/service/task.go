@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
-	"github.com/ZnNr/user-reward-controler/internal/errors"
-	"github.com/ZnNr/user-reward-controler/internal/models"
-	"github.com/ZnNr/user-reward-controler/internal/repository"
+	"github.com/ZnNr/user-reward-controller/internal/errors"
+	"github.com/ZnNr/user-reward-controller/internal/models"
+	"github.com/ZnNr/user-reward-controller/internal/repository"
+
 	"strings"
 
 	"github.com/google/uuid"

@@ -1,0 +1,417 @@
+{
+  "info": {
+    "name": "API Collection for Tasks, Users, and Referrals",
+    "_postman_id": "your-postman-id",
+    "description": "Коллекция запросов для тестирования API задач, пользователей и рефералов",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+
+    {
+      "name": "Создать новую задачу",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Новая задача\", \"description\": \"Описание задачи\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks"]
+        }
+      }
+    },
+    {
+      "name": "Получить все задачи",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks"]
+        }
+      }
+    },
+    {
+      "name": "Получить задачу по ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/tasks/{task_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "{task_id}"]
+        }
+      }
+    },
+    {
+      "name": "Обновить задачу",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Обновленная задача\", \"description\": \"Новое описание задачи\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/tasks/{task_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "{task_id}"]
+        }
+      }
+    },
+    {
+      "name": "Удалить задачу",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:8080/tasks/{task_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "{task_id}"]
+        }
+      }
+    },
+    {
+      "name": "Обновить статус задачи",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"status\": \"завершено\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/tasks/{task_id}/status/{userId}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "{task_id}", "status", "{userId}"]
+        }
+      }
+    },
+    {
+      "name": "Получить описание задачи",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/tasks/{task_id}/description",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "{task_id}", "description"]
+        }
+      }
+    },
+
+
+    {
+      "name": "Создать нового пользователя",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Новый пользователь\", \"email\": \"user@example.com\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users"]
+        }
+      }
+    },
+    {
+      "name": "Получить всех пользователей",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users"]
+        }
+      }
+    },
+    {
+      "name": "Получить пользователя по ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/users/{user_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "{user_id}"]
+        }
+      }
+    },
+    {
+      "name": "Обновить пользователя",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Обновленный пользователь\", \"email\": \"newuser@example.com\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/users/{user_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "{user_id}"]
+        }
+      }
+    },
+    {
+      "name": "Удалить пользователя",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:8080/users/{user_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "{user_id}"]
+        }
+      }
+    },
+    {
+      "name": "Получить пользователя по email",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/users/email",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "email"]
+        }
+      }
+    },
+    {
+      "name": "Обновить баланс пользователя",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"balance\": 1500}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/users/{user_id}/balance",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "{user_id}", "balance"]
+        }
+      }
+    },
+    {
+      "name": "Получить полную информацию о пользователе",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/users/{user_id}/full-info",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "{user_id}", "full-info"]
+        }
+      }
+    },
+    {
+      "name": "Получить сводную информацию о пользователе",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/users/{user_id}/summary",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "{user_id}", "summary"]
+        }
+      }
+    },
+    {
+      "name": "Пригласить пользователя",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"invitee@example.com\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/users/invite",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "invite"]
+        }
+      }
+    },
+    {
+      "name": "Получить лидера по балансу",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/users/leader",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "leader"]
+        }
+      }
+    },
+    {
+      "name": "Получить топ пользователей",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/users/leaderboard",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "leaderboard"]
+        }
+      }
+    },
+
+
+    {
+      "name": "Получить рефералы по ID пользователя",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/referrals",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["referrals"]
+        }
+      }
+    },
+    {
+      "name": "Получить реферал по ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/referrals/{referral_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["referrals", "{referral_id}"]
+        }
+      }
+    },
+    {
+      "name": "Создать реферал",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"referrerId\": \"12345\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/users/{user_id}/referrer",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["users", "{user_id}", "referrer"]
+        }
+      }
+    },
+    {
+      "name": "Обновить реферал",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"newData\": \"Данные для обновления реферала\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/referrals/{referral_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["referrals", "{referral_id}"]
+        }
+      }
+    },
+    {
+      "name": "Удалить реферал",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:8080/referrals/{referral_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["referrals", "{referral_id}"]
+        }
+      }
+    }
+  ]
+}
