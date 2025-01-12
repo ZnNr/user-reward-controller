@@ -3,7 +3,6 @@ package router
 import (
 	"github.com/ZnNr/user-reward-controller/internal/handlers"
 	"github.com/ZnNr/user-reward-controller/internal/logging"
-	"github.com/ZnNr/user-reward-controller/internal/service/auth"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
@@ -16,7 +15,7 @@ func NewRouter(
 	logger *zap.Logger,
 ) *mux.Router {
 	r := mux.NewRouter()
-	r.Use(auth.AuthMiddleware)
+	//r.Use(auth.AuthMiddleware)
 	// Миддлвары для логирования
 	r.Use(logging.LoggingMiddleware(logger))
 

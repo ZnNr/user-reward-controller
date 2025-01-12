@@ -9,48 +9,65 @@ import (
 type UserStatus int
 
 const (
-	Active UserStatus = iota
+	Active UserStatus = iota + 1
 	Suspended
 	Banned
 	Pending // Новый статус ожидания
 )
 
+// String возвращает строковое представление статуса задачи
+func (s UserStatus) String() string {
+	switch s {
+	case Active:
+		return "Active"
+	case Suspended:
+		return "Suspended"
+	case Banned:
+		return "Banned"
+	case Pending:
+		return "Pending"
+	default:
+		return "Unknown"
+	}
+}
+
 // User представляет модель данных пользователя
 type User struct {
-	ID             string      `json:"id" validate:"required"`
-	Username       string      `json:"username" validate:"required"`
-	Email          string      `json:"email" validate:"required,email"`
-	Balance        float64     `json:"balance" validate:"gte=0"`
-	Referrals      int         `json:"referrals" validate:"gte=0"`
-	ReferralCode   string      `json:"referralCode"`
-	TasksCompleted int         `json:"tasksCompleted" validate:"gte=0"`
-	CreatedAt      time.Time   `json:"createdAt"`
-	UpdatedAt      time.Time   `json:"updatedAt"`
-	LastVisit      time.Time   `json:"lastVisit,omitempty"`   // Время последнего посещения
-	VisitCount     int         `json:"visitCount"`            // Общее количество посещений
-	ActivityLog    []time.Time `json:"activityLog,omitempty"` // Лог времени посещений
-	Bio            string      `json:"bio,omitempty"`
-	TimeZone       string      `json:"timeZone,omitempty"`
-	Status         UserStatus  `json:"status"`
+	ID             string      `json:"ID" validate:"required"`
+	Username       string      `json:"Username" validate:"required"`
+	Email          string      `json:"Email" validate:"required,email"`
+	Balance        float64     `json:"Balance" validate:"gte=0"`
+	Referrals      int         `json:"Referrals" validate:"gte=0"`
+	ReferralCode   string      `json:"ReferralCode"`
+	TasksCompleted int         `json:"TasksCompleted" validate:"gte=0"`
+	CreatedAt      time.Time   `json:"CreatedAt"`
+	UpdatedAt      time.Time   `json:"UpdatedAt"`
+	LastVisit      time.Time   `json:"LastVisit,omitempty"`   // Время последнего посещения
+	VisitCount     int         `json:"VisitCount"`            // Общее количество посещений
+	ActivityLog    []time.Time `json:"ActivityLog,omitempty"` // Лог времени посещений
+	Bio            string      `json:"Bio,omitempty"`
+	TimeZone       string      `json:"TimeZone,omitempty"`
+	Status         UserStatus  `json:"Status"`
 }
 
 // NewUser представляет модель для нового пользователя перед активацией
 type NewUser struct {
-	Username     string     `json:"username" validate:"required"`    // Имя пользователя, обязательное поле
-	Email        string     `json:"email" validate:"required,email"` // Электронная почта, обязательное поле с валидацией на корректность
-	ReferralCode string     `json:"referralCode,omitempty"`          // Реферальный код, не обязательное поле
-	Bio          string     `json:"bio,omitempty"`                   // Биография, не обязательное поле
-	TimeZone     string     `json:"timeZone,omitempty"`              // Часовой пояс, не обязательное поле
-	Status       UserStatus `json:"status,omitempty"`                // Статус пользователя, по умолчанию Pending
+	Username     string     `json:"Username" validate:"required"`    // Имя пользователя, обязательное поле
+	Email        string     `json:"Email" validate:"required,email"` // Электронная почта, обязательное поле с валидацией на корректность
+	ReferralCode string     `json:"ReferralCode,omitempty"`          // Реферальный код, не обязательное поле
+	Bio          string     `json:"Bio,omitempty"`                   // Биография, не обязательное поле
+	TimeZone     string     `json:"TimeZone,omitempty"`              // Часовой пояс, не обязательное поле
+	Status       UserStatus `json:"Status,omitempty"`                // Статус пользователя, по умолчанию Pending
 }
 
 // CreateUserRequest представляет модель запроса на создание нового пользователя
 type CreateUserRequest struct {
-	Username     string `json:"username" validate:"required"`    // Имя пользователя, обязательное поле
-	Email        string `json:"email" validate:"required,email"` // Электронная почта, обязательное поле с валидацией на корректность
-	ReferralCode string `json:"referralCode,omitempty"`          // Реферальный код, не обязательное поле
-	Bio          string `json:"bio,omitempty"`                   // Биография, не обязательное поле
-	TimeZone     string `json:"timeZone,omitempty"`              // Часовой пояс, не обязательное поле
+	Username     string     `json:"Username" validate:"required"`    // Имя пользователя, обязательное поле
+	Email        string     `json:"Email" validate:"required,email"` // Электронная почта, обязательное поле с валидацией на корректность
+	ReferralCode string     `json:"ReferralCode,omitempty"`          // Реферальный код, не обязательное поле
+	Bio          string     `json:"Bio,omitempty"`                   // Биография, не обязательное поле
+	TimeZone     string     `json:"TimeZone,omitempty"`              // Часовой пояс, не обязательное поле
+	Status       UserStatus `json:"Status"`
 }
 
 // TopUser представляет пользователя с высшими показателями и использует User
@@ -67,14 +84,14 @@ type TopUsers struct {
 
 // UpdateUserRequest представляет модель запроса на обновление информации о пользователе.
 type UpdateUserRequest struct {
-	UserID       string      `json:"userId" validate:"required"`       // Идентификатор пользователя, обязательное поле
-	Username     *string     `json:"username,omitempty"`               // Имя пользователя, может быть пустым
-	Email        *string     `json:"email,omitempty" validate:"email"` // Электронная почта, может быть пустым, но если присутствует – должна соответствовать валидации email
-	Balance      *float64    `json:"balance,omitempty"`                // Баланс, может быть пустым
-	ReferralCode *string     `json:"referralCode,omitempty"`           // Реферальный код, может быть пустым
-	Bio          *string     `json:"bio,omitempty"`                    // Биография, может быть пустым
-	TimeZone     *string     `json:"timeZone,omitempty"`               // Часовой пояс, может быть пустым
-	Status       *UserStatus `json:"status,omitempty"`                 // Статус пользователя, может быть пустым
+	UserID       string      `json:"ID" validate:"required"`           // Идентификатор пользователя, обязательное поле
+	Username     *string     `json:"Username,omitempty"`               // Имя пользователя, может быть пустым
+	Email        *string     `json:"Email,omitempty" validate:"email"` // Электронная почта, может быть пустым, но если присутствует – должна соответствовать валидации email
+	Balance      *float64    `json:"Balance,omitempty"`                // Баланс, может быть пустым
+	ReferralCode *string     `json:"ReferralCode,omitempty"`           // Реферальный код, может быть пустым
+	Bio          *string     `json:"Bio,omitempty"`                    // Биография, может быть пустым
+	TimeZone     *string     `json:"TimeZone,omitempty"`               // Часовой пояс, может быть пустым
+	Status       *UserStatus `json:"Status,omitempty"`                 // Статус пользователя, может быть пустым
 }
 
 // Структура краткой информации о пользователе

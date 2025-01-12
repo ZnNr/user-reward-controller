@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ZnNr/user-reward-controller/internal/errors"
 	"github.com/ZnNr/user-reward-controller/internal/models"
 	"github.com/ZnNr/user-reward-controller/internal/service"
@@ -54,12 +55,22 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	// Создание фильтра задач
 	filter := &models.TaskFilter{
 		Title:       r.URL.Query().Get("title"),
-		Status:      r.URL.Query().Get("status"),
 		Description: r.URL.Query().Get("description"),
 		AssigneeID:  r.URL.Query().Get("assignee_id"),
 	}
 
-	// Получение параметров страницы и размера страницы
+	// Преобразование статуса
+	statusStr := r.URL.Query().Get("status")
+	if statusStr != "" {
+		status, err := ParseTaskStatus(statusStr)
+		if err != nil {
+			h.handleError(w, err)
+			return
+		}
+		filter.Status = status
+	}
+
+	// Получение параметров страницы и размера страницы с учётом значений по умолчанию
 	if err := h.getPaginationParams(r, filter); err != nil {
 		h.handleError(w, err)
 		return
@@ -84,10 +95,16 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 // Получение параметров страницы и размера страницы
 func (h *TaskHandler) getPaginationParams(r *http.Request, filter *models.TaskFilter) error {
 	var err error
-	if filter.Page, err = getQueryParamInt(r, "page", 0); err != nil {
+
+	// Получаем номер страницы
+	filter.Page, err = getQueryParamInt(r, "page", 1) // Изменен на 1 по умолчанию
+	if err != nil || filter.Page < 1 {
 		return errors.NewBadRequest("Invalid page number", err)
 	}
-	if filter.PageSize, err = getQueryParamInt(r, "page_size", 10); err != nil {
+
+	// Получаем размер страницы
+	filter.PageSize, err = getQueryParamInt(r, "page_size", 10) // Размер по умолчанию
+	if err != nil || filter.PageSize <= 0 {
 		return errors.NewBadRequest("Invalid page size", err)
 	}
 	return nil
@@ -201,8 +218,8 @@ func (h *TaskHandler) UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 		h.handleError(w, errors.NewBadRequest("Invalid status value", err))
 		return
 	}
-
-	updatedTask, err := h.service.UpdateTaskStatus(r.Context(), taskId.String(), newStatus, userID)
+	taskStatus := models.TaskStatus(newStatus) // Преобразование int в TaskStatus
+	updatedTask, err := h.service.UpdateTaskStatus(r.Context(), taskId.String(), taskStatus, userID)
 	if err != nil {
 		h.handleError(w, err)
 		return
@@ -261,4 +278,19 @@ func (h *TaskHandler) GetDescription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.respondWithJSON(w, http.StatusOK, response)
+}
+
+func ParseTaskStatus(statusStr string) (models.TaskStatus, error) {
+	switch statusStr {
+	case "Not Started":
+		return models.NotStarted, nil
+	case "In Progress":
+		return models.InProgress, nil
+	case "Completed":
+		return models.Completed, nil
+	case "Canceled":
+		return models.Canceled, nil
+	default:
+		return 0, fmt.Errorf("unknown status: %s", statusStr)
+	}
 }

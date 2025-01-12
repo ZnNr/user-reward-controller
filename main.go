@@ -50,7 +50,20 @@ func main() {
 
 // loadEnv загружает переменные окружения из файла .env.
 func loadEnv() error {
-	return godotenv.Load()
+	if _, err := os.Stat(".env"); os.IsNotExist(err) {
+		return fmt.Errorf(".env file does not exist")
+	}
+	// Загружаем переменные окружения
+	if err := godotenv.Load(); err != nil {
+		return fmt.Errorf("error loading .env file: %w", err)
+	}
+
+	// вывод переменных .env для отладки
+	fmt.Println("Environment variables loaded:")
+	fmt.Printf("DB_USER: %s\n", os.Getenv("DB_USER"))
+	fmt.Printf("DB_PASSWORD: %s\n", os.Getenv("DB_PASSWORD"))
+
+	return nil
 }
 
 // initLogger инициализирует логгер.

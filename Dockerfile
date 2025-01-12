@@ -8,26 +8,35 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Копируем файл .env
+COPY .env ./
+
 # Копируем остальные файлы исходного кода
 COPY . .
 
-# Собираем приложение, указав путь к исполняемому файлу
-RUN go build -o myapp ./cmd/main.go
+# Устанавливаем переменные окружения для сборки
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 
-# Используем более легкий образ для выполнения приложения
-FROM alpine:latest
+# Собираем приложение, указывая путь к исполняемому файлу
+RUN go build -o user-reward-controller ./main.go
 
-# Устанавливаем необходимые библиотеки
-RUN apk --no-cache add ca-certificates
-
-# Открываем порт для приложения
-EXPOSE 8080
+# Изображение для выполнения
+FROM alpine:3.17
 
 # Устанавливаем рабочую директорию
 WORKDIR /root/
 
-# Копируем исполняемый файл из первого этапа
-COPY --from=builder /app/myapp .
+# Копируем скомпилированное приложение из предыдущего этапа сборки
+COPY --from=builder /app/user-reward-controller .
 
-# Указываем команду запуска контейнера
-CMD ["./myapp"]
+# Убираем файл .env из финального образа, если он не нужен на этапе выполнения
+COPY --from=builder /app/.env .
+
+# Обеспечиваем наличие прав на выполнение
+RUN chmod +x ./user-reward-controller
+
+# Проверяем, что файл есть и он исполняемый
+RUN ls -l ./user-reward-controller
+
+# Указываем команду по умолчанию для запуска приложения
+CMD ["./user-reward-controller"]

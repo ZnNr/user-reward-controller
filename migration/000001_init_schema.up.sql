@@ -6,6 +6,19 @@ DROP TABLE IF EXISTS task_status CASCADE;
 DROP TABLE IF EXISTS referral CASCADE;
 DROP TABLE IF EXISTS Users CASCADE;
 
+-- Создание таблицы статусов задач
+CREATE TABLE user_status (
+                             id SERIAL PRIMARY KEY,
+                             name VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Вставка начальных значений в таблицу статусов задач
+INSERT INTO user_status (name) VALUES
+                                   ('Active'),
+                                   ('Inactive'),
+                                   ('Banned'),
+                                   ('Pending');
+
 -- Создание таблицы пользователей
 CREATE TABLE Users (
                        ID VARCHAR(255) PRIMARY KEY NOT NULL,
@@ -13,7 +26,7 @@ CREATE TABLE Users (
                        Email VARCHAR(255) NOT NULL UNIQUE,
                        Balance DECIMAL(15, 2) CHECK (Balance >= 0),
                        Referrals INT DEFAULT 0 CHECK (Referrals >= 0),
-                       ReferralCode VARCHAR(50),
+                       ReferralCode VARCHAR(255),
                        TasksCompleted INT DEFAULT 0 CHECK (TasksCompleted >= 0),
                        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
                        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -21,7 +34,7 @@ CREATE TABLE Users (
                        VisitCount INT DEFAULT 0,
                        Bio TEXT,
                        TimeZone VARCHAR(50),
-                       Status VARCHAR(20) NOT NULL CHECK (Status IN ('active', 'inactive', 'banned'))
+                       Status INT NOT NULL REFERENCES user_status(id)
 );
 
 -- Создание таблицы для логов активности пользователей
@@ -62,7 +75,7 @@ CREATE TABLE tasks (
                        updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                        due_date TIMESTAMP WITH TIME ZONE,
                        status INT NOT NULL REFERENCES task_status(id),
-                       assignee_id UUID
+                       assignee_id VARCHAR(255)
 );
 
 -- Создание таблицы рефералов

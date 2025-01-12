@@ -41,16 +41,22 @@ func (s *TaskService) CreateTask(ctx context.Context, req *models.CreateTaskRequ
 		Description: req.Description,
 		CreatedAt:   time.Now(), // Установка текущего времени в качестве времени создания
 		DueDate:     req.DueDate,
-		Status:      req.Status,     // Direct assignment because Status is of type TaskStatus
-		AssigneeID:  req.AssigneeID, // Convert UUID to string pointer
+		// Установка статуса на основе проверки
+		Status:     validateAndSetStatus(req.Status),
+		AssigneeID: req.AssigneeID,
 	}
-	// Устанавливаем значение по умолчанию для статуса, если не было указано
-	if req.Status == models.NotStarted || req.Status == models.InProgress || req.Status == models.Completed {
-		task.Status = req.Status // Если передано допустимое значение, устанавливаем его.
-	} else {
-		task.Status = models.NotStarted // Устанавливаем статус по умолчанию
-	}
+
 	return s.repo.CreateTask(ctx, task)
+}
+
+// ValidateAndSetStatus возвращает статус задачи на основании проверки входного значения
+func validateAndSetStatus(status models.TaskStatus) models.TaskStatus {
+	switch status {
+	case models.NotStarted, models.InProgress, models.Completed, models.Canceled:
+		return status
+	default:
+		return models.NotStarted // Статус по умолчанию
+	}
 }
 
 // UpdateTask обновляет существующую задачу.
@@ -90,7 +96,7 @@ func updateTaskFields(task *models.Task, req *models.UpdateTaskRequest) {
 		task.DueDate = req.DueDate
 	}
 	if req.Status != 0 { // Если Status - это 0, значит, он не был установлен
-		task.Status = req.Status // Простое присваивание, если Status не равен 0
+		task.Status = validateAndSetStatus(req.Status) // Валидация и установка нового статуса
 	}
 	if req.AssigneeID != nil && *req.AssigneeID != "" {
 		task.AssigneeID = req.AssigneeID
@@ -98,10 +104,10 @@ func updateTaskFields(task *models.Task, req *models.UpdateTaskRequest) {
 }
 
 // UpdateTaskStatus обновляет статус существующей задачи.
-func (s *TaskService) UpdateTaskStatus(ctx context.Context, taskID string, newStatus int, userID uuid.UUID) (*models.Task, error) {
+func (s *TaskService) UpdateTaskStatus(ctx context.Context, taskID string, newStatus models.TaskStatus, userID uuid.UUID) (*models.Task, error) {
 	s.logger.Info("Updating task status",
 		zap.String("taskID", taskID),
-		zap.Int("newStatus", newStatus))
+		zap.Int("newStatus", int(newStatus)))
 
 	taskIDParsed, err := uuid.Parse(taskID)
 	if err != nil {
@@ -109,13 +115,19 @@ func (s *TaskService) UpdateTaskStatus(ctx context.Context, taskID string, newSt
 		return nil, errors.NewBadRequest("invalid task ID", err)
 	}
 
-	updatedTask, err := s.repo.UpdateTaskStatus(ctx, taskIDParsed.String(), newStatus, userID)
+	// Используем validateAndSetStatus для валидации нового статуса
+	if newStatus < models.NotStarted || newStatus > models.Canceled {
+		s.logger.Error("Invalid status provided", zap.Int("newStatus", int(newStatus)))
+		return nil, errors.NewBadRequest("invalid status", nil)
+	}
+
+	updatedTask, err := s.repo.UpdateTaskStatus(ctx, taskIDParsed.String(), int(newStatus), userID)
 	if err != nil {
 		s.logger.Error("Failed to update task status", zap.Error(err))
 		return nil, err
 	}
 
-	s.logger.Info("Successfully updated task status", zap.String("taskID", taskID), zap.Int("newStatus", newStatus))
+	s.logger.Info("Successfully updated task status", zap.String("taskID", taskID), zap.Int("newStatus", int(newStatus)))
 	return updatedTask, nil
 }
 
@@ -131,9 +143,9 @@ func (s *TaskService) GetTasks(ctx context.Context, filter *models.TaskFilter) (
 		zap.Any("CreatedBefore", filter.CreatedBefore),
 		zap.Any("DueAfter", filter.DueAfter),
 		zap.Any("DueBefore", filter.DueBefore),
-		zap.Int("page", filter.Page),
-		zap.Int("pageSize", filter.PageSize))
-
+		//zap.Int("page", filter.Page),
+		//zap.Int("pageSize", filter.PageSize))
+	)
 	// Валидация параметров фильтра
 	if err := validateFilter(filter); err != nil {
 		s.logger.Warn("Invalid filter", zap.Error(err))
@@ -240,12 +252,6 @@ func validateTaskRequest(req *models.CreateTaskRequest) error {
 		return errors.NewValidation("task title cannot be empty", nil)
 	}
 
-	//if req.DueDate.IsZero() {
-	//	return errors.NewValidation("due date cannot be empty", nil)
-	//}
-	if req.DueDate.Before(time.Now()) {
-		return errors.NewValidation("due date cannot be in the past", nil)
-	}
 	return nil
 }
 
@@ -256,12 +262,16 @@ func generateTaskID() string {
 
 // validateFilter выполняет проверку валидации фильтра задач.
 func validateFilter(filter *models.TaskFilter) error {
-	if filter.Page < 1 {
-		return errors.NewValidation("page must be at least 1", nil)
+	//if filter.Page < 1 {
+	//	return errors.NewValidation("page must be at least 1", nil)
+	//}
+	//if filter.PageSize < 1 {
+	//	return errors.NewValidation("page size must be at least 1", nil)
+	//}
+	if filter.AssigneeID != "" {
+		if _, err := uuid.Parse(filter.AssigneeID); err != nil {
+			return errors.NewValidation("AssigneeID must be a valid UUID", nil)
+		}
 	}
-	if filter.PageSize < 1 {
-		return errors.NewValidation("page size must be at least 1", nil)
-	}
-	//доп проверки
 	return nil
 }

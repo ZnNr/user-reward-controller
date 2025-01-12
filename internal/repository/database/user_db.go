@@ -24,9 +24,7 @@ const (
 	WHERE ID = $1;`
 
 	// Создание нового пользователя
-	CreateUserQuery = `INSERT INTO Users (ID, Username, Email, Balance, Referrals, ReferralCode, TasksCompleted, Bio, TimeZone, Status)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-	RETURNING ID, Username, Email, Balance, Referrals, ReferralCode, TasksCompleted, CreatedAt, UpdatedAt;`
+	CreateUserQuery = `INSERT INTO Users (ID, Username, Email, Status) VALUES ($1, $2, $3, $4) RETURNING ID, Username, Email, Status, CreatedAt;`
 
 	// Обновление пользователя
 	UpdateUserQuery = `UPDATE Users
@@ -161,10 +159,18 @@ func (r *PostgresUserRepository) GetUserByID(ctx context.Context, id uuid.UUID) 
 
 // Создать нового пользователя
 func (r *PostgresUserRepository) CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
-	err := r.db.QueryRowContext(ctx, CreateUserQuery, user.ID, user.Username, user.Email, user.Balance, user.Referrals,
-		user.ReferralCode, user.TasksCompleted, user.Bio, user.TimeZone, user.Status).
-		Scan(&user.ID, &user.Username, &user.Email, &user.Balance, &user.Referrals, user.ReferralCode,
-			&user.TasksCompleted, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.QueryRowContext(ctx,
+		CreateUserQuery,
+		user.ID,
+		user.Username,
+		user.Email,
+		user.Status).
+		Scan(&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Status,
+			&user.CreatedAt,
+		)
 	if err != nil {
 		return nil, err
 	}

@@ -36,7 +36,7 @@ func LoadConfig() (*Config, error) {
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", "postgres"),
-		DBName:     getEnv("DB_NAME", "user-reward-controller"),
+		DBName:     getEnv("DB_NAME", "user_reward_db"),
 		ServerPort: getEnv("SERVER_PORT", "8080"),
 	}, nil
 }
@@ -45,12 +45,6 @@ func LoadConfig() (*Config, error) {
 func (c *Config) GetDBConnString() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		c.DBHost, c.DBPort, c.DBUser, c.DBPassword, c.DBName)
-}
-
-// GetDBConnStringWithoutDatabase формирует строку подключения к Postgres без указания базы данных.
-func (c *Config) GetDBConnStringWithoutDatabase() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable",
-		c.DBHost, c.DBPort, c.DBUser, c.DBPassword)
 }
 
 // getEnv возвращает значение переменной окружения или значение по умолчанию.

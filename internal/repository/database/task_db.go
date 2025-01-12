@@ -7,7 +7,6 @@ import (
 	"github.com/ZnNr/user-reward-controller/internal/errors"
 	"github.com/ZnNr/user-reward-controller/internal/models"
 	"github.com/ZnNr/user-reward-controller/internal/repository"
-
 	"github.com/google/uuid"
 )
 
@@ -50,9 +49,14 @@ const (
 	getAllTasksQuery = `
 	SELECT task_id, title, description, created_at, updated_at, due_date, status, assignee_id 
 	FROM tasks 
-	WHERE ($1 IS NULL OR title ILIKE '%' || $1 || '%') AND ($2 IS NULL OR created_at >= $2) AND ($3 IS NULL OR created_at <= $3) AND ($4 IS NULL OR due_date >= $4) AND ($5 IS NULL OR due_date <= $5) AND ($6 IS NULL OR status = $6) AND ($7 IS NULL OR assignee_id = $7)
-	ORDER BY created_at DESC
-	LIMIT $8 OFFSET $9;`
+	WHERE ($1 IS NULL OR title ILIKE '%' || $1 || '%') 
+	  AND ($2::timestamp IS NULL OR created_at >= $2) 
+	  AND ($3::timestamp IS NULL OR created_at <= $3) 
+	  AND ($4::timestamp IS NULL OR due_date >= $4) 
+	  AND ($5::timestamp IS NULL OR due_date <= $5) 
+	  AND ($6 IS NULL OR status = $6) 
+	  AND ($7 IS NULL OR assignee_id = $7)
+	ORDER BY created_at DESC;`
 
 	userTaskStatusChangeQuery = `UPDATE users SET TasksCompleted = TasksCompleted + 1 WHERE id = $1`
 )
@@ -100,7 +104,6 @@ func (r *PostgresTaskRepository) insertTask(ctx context.Context, task *models.Ta
 		&task.DueDate,
 		&task.Status,
 		&task.AssigneeID,
-		&task.UpdatedAt,
 	)
 	if err != nil {
 		return errors.NewInternal("failed to insert task", err)
@@ -108,21 +111,24 @@ func (r *PostgresTaskRepository) insertTask(ctx context.Context, task *models.Ta
 	return nil
 }
 
-// GetTasks retrieves a paginated list of tasks based on filters.
 func (r *PostgresTaskRepository) GetTasks(ctx context.Context, filter *models.TaskFilter) (*models.TaskResponse, error) {
+	// Apply default filter values
 	setDefaultFilterValues(filter)
 
+	// Count the total number of tasks
 	totalItems, err := r.countTotalTasks(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	// Handling pagination
-	totalPages := (totalItems + filter.PageSize - 1) / filter.PageSize
+	// Calculate total pages
+	totalPages := (totalItems + filter.PageSize - 1) / filter.PageSize // Ceiling division
+
 	if filter.Page > totalPages {
 		return nil, errors.NewNotFound(fmt.Sprintf("page %d does not exist, total pages: %d", filter.Page, totalPages), nil)
 	}
 
+	// Fetch tasks for the requested page
 	offset := (filter.Page - 1) * filter.PageSize
 	tasks, err := r.getTasksByPage(ctx, filter, offset)
 	if err != nil {
@@ -142,6 +148,7 @@ func (r *PostgresTaskRepository) GetTasks(ctx context.Context, filter *models.Ta
 func (r *PostgresTaskRepository) getTasksByPage(ctx context.Context, filter *models.TaskFilter, offset int) ([]models.Task, error) {
 	rows, err := r.db.QueryContext(ctx, getAllTasksQuery,
 		filter.Title,
+
 		filter.CreatedAfter,
 		filter.CreatedBefore,
 		filter.DueAfter,
@@ -151,6 +158,7 @@ func (r *PostgresTaskRepository) getTasksByPage(ctx context.Context, filter *mod
 		filter.PageSize,
 		offset,
 	)
+
 	if err != nil {
 		return nil, errors.NewInternal("failed to query tasks", err)
 	}
@@ -163,18 +171,18 @@ func (r *PostgresTaskRepository) getTasksByPage(ctx context.Context, filter *mod
 			&task.TaskID,
 			&task.Title,
 			&task.Description,
-			&task.CreatedAt,
-			&task.UpdatedAt,
 			&task.DueDate,
 			&task.Status,
 			&task.AssigneeID,
+			&task.CreatedAt,
+			&task.UpdatedAt,
 		); err != nil {
 			return nil, errors.NewInternal("failed to scan task", err)
 		}
 		tasks = append(tasks, task)
 	}
 
-	// Handle row iteration error
+	// Обработка ошибок итерации по строкам
 	if err = rows.Err(); err != nil {
 		return nil, errors.NewInternal("error occurred while iterating over tasks", err)
 	}
@@ -182,13 +190,16 @@ func (r *PostgresTaskRepository) getTasksByPage(ctx context.Context, filter *mod
 	return tasks, nil
 }
 
-// setDefaultFilterValues sets default values for the filter.
 func setDefaultFilterValues(filter *models.TaskFilter) {
 	if filter.PageSize <= 0 {
-		filter.PageSize = 10
+		filter.PageSize = 10 // Default page size
 	}
 	if filter.Page <= 0 {
-		filter.Page = 1
+		filter.Page = 1 // Default to the first page
+	}
+	// Optional: Provide defaults for time-based filters (e.g., CreatedAfter/DueAfter)
+	if filter.Title == "" {
+		filter.Title = "%" // Default match-all title
 	}
 }
 

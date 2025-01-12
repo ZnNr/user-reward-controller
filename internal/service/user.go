@@ -60,7 +60,7 @@ func (s *UserService) GetUserByID(ctx context.Context, id string) (*models.User,
 
 // CreateUser создает нового пользователя
 func (s *UserService) CreateUser(ctx context.Context, req *models.CreateUserRequest) (*models.User, error) {
-	s.logger.Info("Creating new user", zap.String("username", req.Username), zap.String("email", req.Email))
+	s.logger.Info("Creating new user", zap.String("Username", req.Username), zap.String("email", req.Email))
 
 	if err := validateUserRequest(req); err != nil {
 		s.logger.Error("User request validation failed", zap.Error(err))
@@ -68,10 +68,12 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.CreateUserRequ
 	}
 
 	user := &models.User{
-		ID:        generateUserID(),
-		Email:     req.Email,
-		CreatedAt: time.Now(),
-		Username:  req.Username,
+		ID:           generateUserID(),
+		Email:        req.Email,
+		Username:     req.Username,
+		ReferralCode: req.ReferralCode,
+		Status:       validateAndSetUserStatus(req.Status),
+		CreatedAt:    time.Now(),
 	}
 
 	createdUser, err := s.repo.CreateUser(ctx, user)
@@ -82,6 +84,16 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.CreateUserRequ
 
 	s.logger.Info("User created successfully", zap.String("userID", createdUser.ID))
 	return createdUser, nil
+}
+
+// ValidateAndSetStatus возвращает статус пользователя на основании проверки входного значения
+func validateAndSetUserStatus(status models.UserStatus) models.UserStatus {
+	switch status {
+	case models.Active, models.Suspended, models.Banned:
+		return status
+	default:
+		return models.Pending // Статус по умолчанию
+	}
 }
 
 // validateUserRequest проверяет корректность данных запроса на создание пользователя
